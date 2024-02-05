@@ -5,10 +5,10 @@ import altair as alt
 import plotly.express as px
 
 
-ipl = pd.read_csv('Streamlit-IPL-App\Streamlit\venv\Files\IPL_Matches_2008_2022.csv')
+ipl = pd.read_csv('Streamlit-IPL-App/Streamlit/venv/Files/IPL_Matches_2008_2022.csv')
 l = list(ipl.Season.unique())
-batter = pd.read_csv('Streamlit-IPL-App\Streamlit\venv\Files\ipl_deliveries.csv')
-ball = pd.read_csv('Streamlit-IPL-App\Streamlit\venv\Files\IPL_Ball_by_Ball_2008_2022.csv')
+batter = pd.read_csv('Streamlit-IPL-App/Streamlit/venv/Files/ipl_deliveries.csv')
+ball = pd.read_csv('Streamlit-IPL-App/Streamlit/venv/Files/IPL_Ball_by_Ball_2008_2022.csv')
 l = pd.Series(l)
 
 def matches_played(team, df):
@@ -200,8 +200,8 @@ def heatmap(season,team,run):
     fig = px.imshow(df, color_continuous_scale='reds')
 
     fig.update_layout(
-        xaxis=dict(tickvals=list(range(0, len(custom_x_labels))), ticktext=custom_x_labels, title_text="Overs", title=dict(font=dict(color="black"))),
-        yaxis=dict(title_text="Ball Number", title=dict(font=dict(color="black"))),
+        xaxis=dict(tickvals=list(range(0, len(custom_x_labels))), ticktext=custom_x_labels, title_text="Overs", title=dict(font=dict(color="white"))),
+        yaxis=dict(title_text="Ball Number", title=dict(font=dict(color="white"))),
         title='Boundaries Heat Map'
     )
 
@@ -241,8 +241,8 @@ def b_heatmap(season,team):
     custom_x_labels = list(range(1, 21))
 
     fig.update_layout(
-        xaxis=dict(tickvals=list(range(0, len(custom_x_labels))), ticktext=custom_x_labels, title_text="Overs", title=dict(font=dict(color="black"))),
-        yaxis=dict(title_text="Ball Number", title=dict(font=dict(color="black"))),
+        xaxis=dict(tickvals=list(range(0, len(custom_x_labels))), ticktext=custom_x_labels, title_text="Overs", title=dict(font=dict(color="white"))),
+        yaxis=dict(title_text="Ball Number", title=dict(font=dict(color="white"))),
         title="Bowler Wickets Heatmap",
     )
 
@@ -331,9 +331,9 @@ if option != 'Select Team' and len(multiselect)>0:
             st.dataframe(df,use_container_width=True)
 
             if not df.empty:
-                col = st.color_picker('Select a plot colour (Auto Scale the plot)')
+                col = st.color_picker('Select a plot colour (Auto Scale the plot)',value='#FFCC80')
                 fig = px.scatter(df, x='Avg', y='StrikeRate', text=df.index, size=df['TotalRuns']*4, hover_name=df.index,title='Batsman Analysis')
-                fig.update_traces(textposition='bottom right', textfont=dict(color='black'))
+                fig.update_traces(textposition='bottom right', textfont=dict(color='white'))
                 fig.update_layout(
                     xaxis=dict(range=[df['Avg'].min(), df['Avg'].max()]),
                     yaxis=dict(range=[df['StrikeRate'].min(), df['StrikeRate'].max()])
@@ -393,7 +393,7 @@ if option != 'Select Team' and len(multiselect)>0:
 
             if not df.empty:
                 fig = px.scatter(df, x='Economy', y='Bowler Wicket', text='bowler', size='Legal Ball', hover_name='bowler',title='Bowler Analysis')
-                fig.update_traces(textposition='bottom right', textfont=dict(color='black'))
+                fig.update_traces(textposition='bottom right', textfont=dict(color='white'))
                 fig.update_layout(
                     xaxis=dict(range=[df['Economy'].min(), df['Economy'].max()]),
                     yaxis=dict(range=[df['Bowler Wicket'].min(), df['Bowler Wicket'].max()])
