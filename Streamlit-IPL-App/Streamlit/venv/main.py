@@ -5,10 +5,10 @@ import altair as alt
 import plotly.express as px
 
 
-ipl = pd.read_csv('Streamlit-IPL-App\Streamlit\venv\Files\IPL_Matches_2008_2022.csv')
+ipl = pd.read_csv('Streamlit-IPL-App/Streamlit/venv/Files/IPL_Matches_2008_2022.csv')
 l = list(ipl.Season.unique())
-batter = pd.read_csv('Streamlit-IPL-App\Streamlit\venv\Files\ipl_deliveries.csv')
-ball = pd.read_csv('Streamlit-IPL-App\Streamlit\venv\Files\IPL_Ball_by_Ball_2008_2022.csv')
+batter = pd.read_csv('Streamlit-IPL-App/Streamlit/venv/Files/ipl_deliveries.csv')
+ball = pd.read_csv('Streamlit-IPL-App/Streamlit/venv/Files/IPL_Ball_by_Ball_2008_2022.csv')
 l = pd.Series(l)
 
 def matches_played(team, df):
