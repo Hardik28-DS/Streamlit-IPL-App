@@ -131,10 +131,12 @@ def toss_win(seasons, team):
     
     r = pd.DataFrame()
     r['TossWinner'] = result_df.index
-    r[season] = result_df.values
     
     for season in seasons:
-        toss = r.loc[r['TossWinner'] == team, str(season)]
+        toss_data = result_df[season].copy()
+        r[season] = toss_data.values
+        
+        toss = r.loc[r['TossWinner'] == team, season]
         toss_numeric = pd.to_numeric(toss, errors='coerce').fillna(0)
         
         if matches_by_season[season] > 0: 
