@@ -5,10 +5,10 @@ import altair as alt
 import plotly.express as px
 
 
-ipl = pd.read_csv('Streamlit-IPL-App/Streamlit/venv/Files/IPL_Matches_2008_2022.csv')
+ipl = pd.read_csv('streamlit\Streamlit\Files\IPL_Matches_2008_2022.csv')
 l = list(ipl.Season.unique())
-batter = pd.read_csv('Streamlit-IPL-App/Streamlit/venv/Files/ipl_deliveries.csv')
-ball = pd.read_csv('Streamlit-IPL-App/Streamlit/venv/Files/IPL_Ball_by_Ball_2008_2022.csv')
+batter = pd.read_csv('streamlit\Streamlit\Files\ipl_deliveries.csv')
+ball = pd.read_csv('streamlit\Streamlit\Files\IPL_Ball_by_Ball_2008_2022.csv')
 l = pd.Series(l)
 
 def matches_played(team, df):
@@ -69,28 +69,33 @@ def season(seasons):
         return styled_result_df
     else:
         return pd.DataFrame()
-
+    
 def choice(season, team):
     all_season = []
-
     for i in season:
         df = ipl[ipl['Season'].isin([i])]
-        a = df.groupby('Team1')['Team2'].value_counts().reset_index()
-        b = df.groupby('Team2')['Team1'].value_counts().reset_index().rename(columns={'Team2': 'Team1', 'Team1': 'Team2'})
-
-        df = pd.concat([a, b], ignore_index=True)
-        df = df[df.Team1 == team].drop(columns={'Team1'})
-        df = df.rename(columns={'Team2': 'Teams', 'count': 'Matches Played'}).set_index('Teams')
-        all_season.append(df)
-
-    all_season = [df.reset_index() for df in all_season]
-
+        a = df.groupby('Team1')['Team2'].value_counts()
+        team2 = a[team]
+        b = df.groupby('Team2').Team1.value_counts()
+        team1 = pd.DataFrame(b[team])
+        team_2 = pd.DataFrame()
+        team_2['Team'] = team2.index
+        team_2['Matches Played'] = team2.values
+        team_1 = pd.DataFrame()
+        team_1['Team'] = team1.index
+        team_1['Matches Played'] = team1.values
+        merge = pd.concat([team_1, team_2], ignore_index=True)
+        mp = merge.groupby('Team')['Matches Played'].sum()
+        m = pd.DataFrame(mp)
+        m.index = pd.MultiIndex.from_product([[i], m.index], names=['Season', 'Team'])
+        all_season.append(m)
+    
     if all_season:
-        result_df = pd.concat(all_season, axis=0,keys=season)
-        return result_df.reset_index().drop(columns={'level_1'}).rename(columns={'level_0':'Season'}).groupby(['Season','Teams']).sum()
+        result_df = pd.concat(all_season, axis=0)
+        return result_df
     else:
         return pd.DataFrame()
-
+    
 def Players(seasons, team):
     all_seasons = []
 
@@ -112,8 +117,6 @@ def Players(seasons, team):
     result_df = pd.concat(all_seasons, axis=1, keys=seasons).fillna('-')
     return result_df
 
-import pandas as pd
-
 def toss_win(seasons, team):
     all_season = []
     d = {}
@@ -123,10 +126,12 @@ def toss_win(seasons, team):
         all_season.append(toss_win)
     
     result_df = pd.concat(all_season, axis=1, keys=seasons).fillna(0)
-    df = ipl[ipl['Season'].isin(seasons)]  # Use isin to select multiple seasons
+    df = ipl[ipl['Season'].isin(seasons)]
     matches_by_season = df.groupby('Season').apply(lambda x: x[(x['Team1'] == team) | (x['Team2'] == team)].shape[0])
     
-    r = result_df.reset_index()
+    r = pd.DataFrame()
+    r['TossWinner'] = result_df.index
+    r[season] = result_df.values
     
     for season in seasons:
         toss = r.loc[r['TossWinner'] == team, str(season)]
@@ -139,7 +144,6 @@ def toss_win(seasons, team):
             d[season] = 0.0 
     
     return d
-
 
 def decision(season, team):
     toss_decision_counts = ipl[ipl.Season == season].groupby(['TossWinner', 'TossDecision'])['MatchNumber'].count().reset_index()
@@ -281,11 +285,11 @@ if option != 'Select Team' and len(multiselect)>0:
         with col1:
             st.subheader('Matches Played Against')
             if multiselect:
-                choice_df = choice(multiselect,option).pivot_table(index='Teams', columns='Season', values='Matches Played', fill_value='-')
+                choice_df = choice(multiselect,option).pivot_table(index='Team', columns='Season', values='Matches Played', fill_value=0)
                 st.dataframe(choice_df,use_container_width=True)
             else:
                 st.dataframe(pd.DataFrame())
-
+        
         with col2:
             st.subheader('Players')
             if multiselect:
@@ -293,15 +297,15 @@ if option != 'Select Team' and len(multiselect)>0:
                 st.dataframe(p_df,use_container_width=True ,hide_index=True)
             else:
                 st.dataframe(pd.DataFrame())
-        
+
         col3, col4, col5, col6 = st.columns(4)
         
         with col3:
             select = st.radio(
                 'Select Season:',
                 multiselect,
-                index=None
-            )
+                index=None)
+
         with col4:
             if select:
                 st.write('Selection:', select)
@@ -323,7 +327,7 @@ if option != 'Select Team' and len(multiselect)>0:
                 st.metric('Toss Decision',f'{d[1]}% to Field')
             else:
                 st.write('Selection:', None)
-        
+
         st.header(f'{option} Batting Analysis')
 
         if select:
@@ -466,3 +470,6 @@ if option != 'Select Team' and len(multiselect)>0:
 
 else:
     st.header('Select The Team & The Seasons')
+
+        
+            
