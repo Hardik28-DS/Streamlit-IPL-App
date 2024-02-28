@@ -70,25 +70,26 @@ def season(seasons):
     else:
         return pd.DataFrame()
     
-def choice(season, team):
+def choice(seasons, team):
     all_season = []
-    for i in season:
-        df = ipl[ipl['Season'].isin([i])]
-        a = df.groupby('Team1')['Team2'].value_counts()
-        team2 = a[team]
-        b = df.groupby('Team2').Team1.value_counts()
-        team1 = pd.DataFrame(b[team])
-        team_2 = pd.DataFrame()
-        team_2['Team'] = team2.index
-        team_2['Matches Played'] = team2.values
-        team_1 = pd.DataFrame()
-        team_1['Team'] = team1.index
-        team_1['Matches Played'] = team1.values
-        merge = pd.concat([team_1, team_2], ignore_index=True)
-        mp = merge.groupby('Team')['Matches Played'].sum()
-        m = pd.DataFrame(mp)
-        m.index = pd.MultiIndex.from_product([[i], m.index], names=['Season', 'Team'])
-        all_season.append(m)
+    for season in seasons:
+        df = ipl[ipl['Season'].isin([season])]
+        if team in df['Team1'].unique() or team in df['Team2'].unique():
+            a = df.groupby('Team1')['Team2'].value_counts()
+            team2 = a[team]
+            b = df.groupby('Team2').Team1.value_counts()
+            team1 = pd.DataFrame(b[team])
+            team_2 = pd.DataFrame()
+            team_2['Team'] = team2.index
+            team_2['Matches Played'] = team2.values
+            team_1 = pd.DataFrame()
+            team_1['Team'] = team1.index
+            team_1['Matches Played'] = team1.values
+            merge = pd.concat([team_1, team_2], ignore_index=True)
+            mp = merge.groupby('Team')['Matches Played'].sum()
+            m = pd.DataFrame(mp)
+            m.index = pd.MultiIndex.from_product([[season], m.index], names=['Season', 'Team'])
+            all_season.append(m)
     
     if all_season:
         result_df = pd.concat(all_season, axis=0)
@@ -287,8 +288,11 @@ if option != 'Select Team' and len(multiselect)>0:
         with col1:
             st.subheader('Matches Played Against')
             if multiselect:
-                choice_df = choice(multiselect,option).pivot_table(index='Team', columns='Season', values='Matches Played', fill_value=0)
-                st.dataframe(choice_df,use_container_width=True)
+                if not choice(multiselect, option).empty:
+                    choice_df = choice(multiselect,option).pivot_table(index='Team', columns='Season', values='Matches Played', fill_value=0)
+                    st.dataframe(choice_df,use_container_width=True)
+                else:
+                    st.dataframe(pd.DataFrame())
             else:
                 st.dataframe(pd.DataFrame())
         
